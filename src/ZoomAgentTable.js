@@ -49,9 +49,17 @@ function fetchAgents(){
                 "firstName" : "Frank",
                 "lastName" : "Thomas",
                 "email": "thebighurt@hotmail.com",
-                "phone" : "888-867-5309",
+                "phone" : "+1-888-867-5309",
                 "presence_status": "Available"
-            }
+            },
+            {   
+                "id": "hkzyghiqs1q757uqd2rcyq",
+                "firstName" : "David",
+                "lastName" : "Ortiz",
+                "email": "bigpapi@gmail.com",
+                "phone" : "+1-877-555-1234",
+                "presence_status": "Available"
+            },
         ]
     }
 }
