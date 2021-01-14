@@ -57,42 +57,37 @@ import { Table, Checkbox } from '@cobalt/cobalt-react-components'
     }
   }
   
-  class SearchBar extends React.Component {
+ const SearchBar = (props) => {
+  const [t] = useTranslation()
 
-    constructor(props) {
-      super(props);
-      this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
-      this.handleAvailableOnlyChange = this.handleAvailableOnlyChange.bind(this);
-    }
-    
-    handleFilterTextChange(e) {
-      this.props.onFilterTextChange(e.target.value);
-    }
-    
-    handleAvailableOnlyChange(e) {
-      this.props.onInStockChange(e.target.checked);
-    }
-    
-    render() {
-      return (
-        <form>
-          <input
-            type="text"
-            placeholder="Search..."
-            value={this.props.filterText}
-            onChange={this.handleFilterTextChange}
-          />
-          <p>
-          <Checkbox 
-              checked={this.props.availableOnly}
-              onChange={this.handleAvailableOnlyChange} >
-            Only show available agents
-          </Checkbox>
-          </p>
-        </form>
-      );
-    }
+  const handleFilterTextChange = (e) => {
+    props.onFilterTextChange(e.target.value)
+
   }
+  
+  const handleAvailableOnlyChange = (e) => {
+    props.onInStockChange(e.target.checked)
+
+  }
+
+  return (
+    <form>
+      <input
+        type="text"
+        placeholder="Search..."
+        value={props.filterText}
+        onChange={handleFilterTextChange}
+      />
+      <Checkbox
+          value='availableOnly'
+          checked={props.availableOnly}
+          onChange={handleAvailableOnlyChange} >
+        {t('Only show available agents')}
+      </Checkbox>
+    </form>
+  )
+
+}
   
   class FilterableZoomAgentTable extends React.Component {
     constructor(props) {
