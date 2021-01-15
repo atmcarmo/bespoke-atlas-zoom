@@ -1,37 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
+
 import { useTranslation } from "react-i18next";
 import { Table, Checkbox } from '@cobalt/cobalt-react-components'
 
   
-  class AgentRow extends React.Component {
-    render() {
-      const agent = this.props.agent;
-      const statusClass = agent.presence_status === 'Available' ? 'active' : 'inactive';
+  const AgentRow = (props) => {
+      const agent = props.agent
+      const statusClass = agent.presence_status === 'Available' ? 'active' : 'inactive'
   
       return (
         <Table.Row key={agent.id}>
-          <Table.Data> <span className={statusClass}> {agent.firstName} {agent.lastName} </span></Table.Data>
+          <Table.Data> <span constName={statusClass}> {agent.firstName} {agent.lastName} </span></Table.Data>
           <Table.Data> {agent.phone} </Table.Data>
           <Table.Data> {agent.presence_status} </Table.Data>
         </Table.Row>
-      );
-    }
+      )
   }
   
-  class AgentTable extends React.Component {
-    render() {
-      const filterText = this.props.filterText;
-      const availableOnly = this.props.availableOnly;
+  const AgentTable = (props) => {
+      const filterText = props.filterText
+      const availableOnly = props.availableOnly
+      const agents = props.agents
   
-      const rows = [];
+      const rows = []
   
-      this.props.agents.forEach((agent) => {
+      agents.forEach((agent) => {
         if (agent.firstName.indexOf(filterText) === -1
         && agent.lastName.indexOf(filterText) === -1) {
-          return;
+          return
+
         }
         if (availableOnly && agent.presence_status !== 'Available') {
-          return;
+          return
+
         }
         rows.push(
           <AgentRow key={agent.id}
@@ -41,20 +42,19 @@ import { Table, Checkbox } from '@cobalt/cobalt-react-components'
       });
 
       return (
-        <Table>
-        <Table.Head>
-            <Table.Row>
-                <Table.Header> Agent </Table.Header>
-                <Table.Header> Phone </Table.Header>
-                <Table.Header> Status </Table.Header>
-            </Table.Row>
-        </Table.Head>
-        <Table.Body>
-          {rows} 
-        </Table.Body>
-      </Table>
-      );
-    }
+        <Table striped>
+          <Table.Head>
+              <Table.Row>
+                  <Table.Header> Agent </Table.Header>
+                  <Table.Header> Phone </Table.Header>
+                  <Table.Header> Status </Table.Header>
+              </Table.Row>
+          </Table.Head>
+          <Table.Body>
+            {rows} 
+          </Table.Body>
+        </Table>
+      )
   }
   
  const SearchBar = (props) => {
@@ -89,47 +89,43 @@ import { Table, Checkbox } from '@cobalt/cobalt-react-components'
 
 }
   
-  class FilterableZoomAgentTable extends React.Component {
-    constructor(props) {
-      super(props);
+  const FilterableZoomAgentTable = (props) => {
+      /* convert to hooks 
       this.state = {
         filterText: '',
         availableOnly: false
-      };
+      };*/
+    let agents = props.agents
+
+    const[filterText, setFilterText] = useState('')
+    const[availableOnly, setAvailableOnly] = useState(false)
       
-      this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
-      this.handleAvailableOnlyChange = this.handleAvailableOnlyChange.bind(this);
-    }
-  
-    handleFilterTextChange(filterText) {
-      this.setState({
-        filterText: filterText
-      });
+    const handleFilterTextChange = (filterText) => {
+      setFilterText(filterText)
+
     }
     
-    handleAvailableOnlyChange(availableOnly) {
-      this.setState({
-        availableOnly: availableOnly
-      })
+    const handleAvailableOnlyChange = (availableOnly) => {
+      setAvailableOnly(availableOnly)
+
     }
   
-    render() {
-      return (
-        <div>
-          <SearchBar
-            filterText={this.state.filterText}
-            availableOnly={this.state.availableOnly}
-            onFilterTextChange={this.handleFilterTextChange}
-            onInStockChange={this.handleAvailableOnlyChange}
-          />
-          <AgentTable
-            agents={this.props.agents}
-            filterText={this.state.filterText}
-            availableOnly={this.state.availableOnly}
-          />
-        </div>
-      );
-    }
+    return (
+      <div>
+        <SearchBar
+          filterText={filterText}
+          availableOnly={availableOnly}
+          onFilterTextChange={handleFilterTextChange}
+          onInStockChange={handleAvailableOnlyChange}
+        />
+        <AgentTable
+          agents={agents}
+          filterText={filterText}
+          availableOnly={availableOnly}
+        />
+      </div>
+
+    );
   }
 
   export { FilterableZoomAgentTable }
