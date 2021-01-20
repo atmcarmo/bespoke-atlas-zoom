@@ -4,25 +4,6 @@ import { useTranslation } from "react-i18next";
 import { useCurrentUser } from './hooks'
 import { FilterableZoomAgentTable } from './FilterableZoomAgentTable'
 
-const AGENTS = [
-  {   
-      "id": "hkzyghiqs1q757uqd2rcyq",
-      "firstName" : "Frank",
-      "lastName" : "Thomas",
-      "email": "thebighurt@hotmail.com",
-      "phone" : "+1-888-867-5309",
-      "presence_status": "Available"
-  },
-  {   
-      "id": "abcedfhiqs1q757uqd2rcyq",
-      "firstName" : "David",
-      "lastName" : "Ortiz",
-      "email": "bigpapi@gmail.com",
-      "phone" : "+1-877-555-1234",
-      "presence_status": "Away"
-  }
-];
-
 export default function App() {
   const user = useCurrentUser();
   return (
@@ -39,7 +20,7 @@ function AppContent({ user }) {
       <Page.Content>
         <Grid pushCenter fullHeight>
           <Grid.Group>
-            <FilterableZoomAgentTable agents={AGENTS}/>
+            <FilterableZoomAgentTable />
           </Grid.Group>
         </Grid>
       </Page.Content>
