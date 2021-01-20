@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from 'react';
 
 import { useTranslation } from "react-i18next";
-import { Table, Checkbox, Radio, Pagination } from '@cobalt/cobalt-react-components'
+import { Grid, Table, Checkbox, Radio, Pagination, Icon } from '@cobalt/cobalt-react-components'
 
 
 const AgentRow = (props) => {
   const agent = props.agent
-  const statusClass = agent.presence_status ? 'active' : 'inactive'
+  const statusColor = agent.presence_status ? 'co--primary-600' : 'co--secondary-200'
   const onSelectedAgentChange = props.onSelectedAgentChange
   const selected = agent.id === props.selectedAgentId
+  console.log('statusColor:: ' + statusColor)
 
   return (
     <Table.Row selected={selected} key={agent.id}>
       <Table.Data>
         <Radio checked={selected} value={agent.id} onChange={onSelectedAgentChange} />
       </Table.Data>
-      <Table.Data> <span className={statusClass}> {agent.firstName} {agent.lastName} </span></Table.Data>
+      <Table.Data> {agent.firstName} {agent.lastName} </Table.Data>
       <Table.Data> {agent.phone} </Table.Data>
-      <Table.Data> {statusClass} </Table.Data>
+      <Table.Data> {agent.email} </Table.Data>
+      <Table.Data alignment={Table.Data.ALIGNMENT.CENTER}> 
+        <Icon name="check_circle" color={statusColor} /> 
+      </Table.Data>
     </Table.Row>
   )
 }
@@ -49,18 +53,22 @@ const AgentTable = (props) => {
   });
 
   return (
-    <Table selectable>
-      <Table.Head>
-        <Table.Row>
-          <Table.Header> Agent </Table.Header>
-          <Table.Header> Phone </Table.Header>
-          <Table.Header> Status </Table.Header>
-        </Table.Row>
-      </Table.Head>
-      <Table.Body>
-        {rows}
-      </Table.Body>
-    </Table>
+    <Grid fullWidth>
+      <Table selectable>
+        <Table.Head>
+          <Table.Row>
+            <Table.Header> </Table.Header>
+            <Table.Header> Agent </Table.Header>
+            <Table.Header> Phone </Table.Header>
+            <Table.Header> Email </Table.Header>
+            <Table.Header> Status </Table.Header>
+          </Table.Row>
+        </Table.Head>
+        <Table.Body>
+          {rows}
+        </Table.Body>
+      </Table>
+    </Grid>
   )
 }
 
@@ -109,8 +117,8 @@ const PageNavigation = (props) => {
       currentPage={currentPage}
       totalPages={totalPages}
       onPageClick={handlePageChange}
-      showPages={false}
       showNavLabels={false}
+      collapsed
 
     />
 
@@ -137,7 +145,7 @@ const FilterableZoomAgentTable = (props) => {
       }
     ).then(response => {
       let totalCount = response.headers.get('X-Total-Count')
-      setTotalPages(Math.ceil(totalCount/pageLength))
+      setTotalPages(Math.ceil(totalCount / pageLength))
       return response.json()
     }).then(response => {
       setAgents(response)
