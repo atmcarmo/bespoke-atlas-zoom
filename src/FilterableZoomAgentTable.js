@@ -9,7 +9,6 @@ const AgentRow = (props) => {
   const statusColor = agent.presence_status ? 'co--primary-600' : 'co--secondary-200'
   const onSelectedAgentChange = props.onSelectedAgentChange
   const selected = agent.id === props.selectedAgentId
-  console.log('statusColor:: ' + statusColor)
 
   return (
     <Table.Row selected={selected} key={agent.id}>
@@ -19,26 +18,19 @@ const AgentRow = (props) => {
       <Table.Data> {agent.firstName} {agent.lastName} </Table.Data>
       <Table.Data> {agent.phone} </Table.Data>
       <Table.Data> {agent.email} </Table.Data>
-      <Table.Data alignment={Table.Data.ALIGNMENT.CENTER}> 
-        <Icon name="check_circle" color={statusColor} /> 
-      </Table.Data>
+      <Table.Data alignment={Table.Data.ALIGNMENT.CENTER}>
+        <Icon name="check_circle" color={statusColor} /> </Table.Data>
     </Table.Row>
   )
 }
 
 const AgentTable = (props) => {
-  const filterText = props.filterText
   const availableOnly = props.availableOnly
   const agents = props.agents
 
   const rows = []
 
   agents.forEach((agent) => {
-    if (agent.firstName.indexOf(filterText) === -1
-      && agent.lastName.indexOf(filterText) === -1) {
-      return
-
-    }
     if (availableOnly && agent.presence_status !== true) {
       return
 
@@ -74,9 +66,9 @@ const AgentTable = (props) => {
 
 const SearchBar = (props) => {
   const [t] = useTranslation()
-
+  
   const handleFilterTextChange = (e) => {
-    props.onFilterTextChange(e.target.value)
+     props.onFilterTextChange(e.target.value)
 
   }
 
@@ -137,20 +129,28 @@ const FilterableZoomAgentTable = (props) => {
   const pageLength = 10
 
   useEffect(() => {
-    fetch(
-      `http://localhost:8000/agents?_page=${page}&_limit=${pageLength}`,
-      {
-        method: "GET"
+    const delayDebounceFn = setTimeout(() => {
+      let endpointUrl = `http://localhost:8000/agents?_page=${page}&_limit=${pageLength}`
+      if(filterText !== '' && filterText !== null)
+        endpointUrl += `&agent_name=${filterText}`
+      fetch(
+        endpointUrl,
+        {
+          method: "GET"
+  
+        }
+      ).then(response => {
+        let totalCount = response.headers.get('X-Total-Count')
+        setTotalPages(Math.ceil(totalCount / pageLength))
+        return response.json()
+      }).then(response => {
+        setAgents(response)
+      }).catch(error => console.log(error))
+    }, 500)
 
-      }
-    ).then(response => {
-      let totalCount = response.headers.get('X-Total-Count')
-      setTotalPages(Math.ceil(totalCount / pageLength))
-      return response.json()
-    }).then(response => {
-      setAgents(response)
-    }).catch(error => console.log(error))
-  }, [page]);
+    return () => clearTimeout(delayDebounceFn)
+
+  }, [page, filterText])
 
   const handleFilterTextChange = (filterText) => {
     setFilterText(filterText)
