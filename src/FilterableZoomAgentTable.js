@@ -1,72 +1,79 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useTranslation } from "react-i18next";
-import { Table, Checkbox } from '@cobalt/cobalt-react-components'
+import { Grid, Table, Checkbox, Radio, Pagination, Icon } from '@cobalt/cobalt-react-components'
 
-  
-  const AgentRow = (props) => {
-      const agent = props.agent
-      const statusClass = agent.presence_status === 'Available' ? 'active' : 'inactive'
-  
-      return (
-        <Table.Row key={agent.id}>
-          <Table.Data> <span constName={statusClass}> {agent.firstName} {agent.lastName} </span></Table.Data>
-          <Table.Data> {agent.phone} </Table.Data>
-          <Table.Data> {agent.presence_status} </Table.Data>
-        </Table.Row>
-      )
-  }
-  
-  const AgentTable = (props) => {
-      const filterText = props.filterText
-      const availableOnly = props.availableOnly
-      const agents = props.agents
-  
-      const rows = []
-  
-      agents.forEach((agent) => {
-        if (agent.firstName.indexOf(filterText) === -1
-        && agent.lastName.indexOf(filterText) === -1) {
-          return
 
-        }
-        if (availableOnly && agent.presence_status !== 'Available') {
-          return
+const AgentRow = (props) => {
+  const agent = props.agent
+  const statusColor = agent.presence_status ? 'co--primary-600' : 'co--secondary-200'
+  const onSelectedAgentChange = props.onSelectedAgentChange
+  const selected = agent.id === props.selectedAgentId
 
-        }
-        rows.push(
-          <AgentRow key={agent.id}
-            agent={agent}
-          />
-        );
-      });
+  return (
+    <Table.Row selected={selected} key={agent.id}>
+      <Table.Data>
+        <Radio checked={selected} value={agent.id} onChange={onSelectedAgentChange} />
+      </Table.Data>
+      <Table.Data> {agent.firstName} {agent.lastName} </Table.Data>
+      <Table.Data> {agent.phone} </Table.Data>
+      <Table.Data> {agent.email} </Table.Data>
+      <Table.Data alignment={Table.Data.ALIGNMENT.CENTER}>
+        <Icon name="check_circle" color={statusColor} /> </Table.Data>
+    </Table.Row>
+  )
+}
 
-      return (
-        <Table striped>
-          <Table.Head>
-              <Table.Row>
-                  <Table.Header> Agent </Table.Header>
-                  <Table.Header> Phone </Table.Header>
-                  <Table.Header> Status </Table.Header>
-              </Table.Row>
-          </Table.Head>
-          <Table.Body>
-            {rows} 
-          </Table.Body>
-        </Table>
-      )
-  }
-  
- const SearchBar = (props) => {
+const AgentTable = (props) => {
+  const availableOnly = props.availableOnly
+  const agents = props.agents
+
+  const rows = []
+
+  agents.forEach((agent) => {
+    if (availableOnly && agent.presence_status !== true) {
+      return
+
+    }
+    rows.push(
+      <AgentRow key={agent.id}
+        agent={agent}
+        onSelectedAgentChange={props.handleSelectedAgentChange}
+        selectedAgentId={props.selectedAgentId}
+      />
+    );
+  });
+
+  return (
+    <Grid fullWidth>
+      <Table selectable>
+        <Table.Head>
+          <Table.Row>
+            <Table.Header> </Table.Header>
+            <Table.Header> Agent </Table.Header>
+            <Table.Header> Phone </Table.Header>
+            <Table.Header> Email </Table.Header>
+            <Table.Header> Status </Table.Header>
+          </Table.Row>
+        </Table.Head>
+        <Table.Body>
+          {rows}
+        </Table.Body>
+      </Table>
+    </Grid>
+  )
+}
+
+const SearchBar = (props) => {
   const [t] = useTranslation()
-
+  
   const handleFilterTextChange = (e) => {
-    props.onFilterTextChange(e.target.value)
+     props.onFilterTextChange(e.target.value)
 
   }
-  
+
   const handleAvailableOnlyChange = (e) => {
-    props.onInStockChange(e.target.checked)
+    props.onAvailablityChange(e.target.checked)
 
   }
 
@@ -79,53 +86,117 @@ import { Table, Checkbox } from '@cobalt/cobalt-react-components'
         onChange={handleFilterTextChange}
       />
       <Checkbox
-          value='availableOnly'
-          checked={props.availableOnly}
-          onChange={handleAvailableOnlyChange} >
+        value='availableOnly'
+        checked={props.availableOnly}
+        onChange={handleAvailableOnlyChange} >
         {t('Only show available agents')}
       </Checkbox>
     </form>
   )
 
 }
-  
-  const FilterableZoomAgentTable = (props) => {
-      /* convert to hooks 
-      this.state = {
-        filterText: '',
-        availableOnly: false
-      };*/
-    let agents = props.agents
 
-    const[filterText, setFilterText] = useState('')
-    const[availableOnly, setAvailableOnly] = useState(false)
-      
-    const handleFilterTextChange = (filterText) => {
-      setFilterText(filterText)
+const PageNavigation = (props) => {
+  let currentPage = props.currentPage
+  let totalPages = props.totalPages
+  const handlePageChange = (nextPage) => {
+    props.onPageChange(nextPage)
 
-    }
-    
-    const handleAvailableOnlyChange = (availableOnly) => {
-      setAvailableOnly(availableOnly)
-
-    }
-  
-    return (
-      <div>
-        <SearchBar
-          filterText={filterText}
-          availableOnly={availableOnly}
-          onFilterTextChange={handleFilterTextChange}
-          onInStockChange={handleAvailableOnlyChange}
-        />
-        <AgentTable
-          agents={agents}
-          filterText={filterText}
-          availableOnly={availableOnly}
-        />
-      </div>
-
-    );
   }
 
-  export { FilterableZoomAgentTable }
+  return (
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageClick={handlePageChange}
+      showNavLabels={false}
+      collapsed
+
+    />
+
+  )
+
+}
+
+const FilterableZoomAgentTable = (props) => {
+  const [filterText, setFilterText] = useState('')
+  const [availableOnly, setAvailableOnly] = useState(false)
+  const [page, setPage] = useState(1)
+  const [agents, setAgents] = useState([])
+  const [totalPages, setTotalPages] = useState(1)
+  const [selectedAgentId, setSelectedAgentId] = useState()
+
+  const pageLength = 10
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      let endpointUrl = `http://localhost:8000/agents?_page=${page}&_limit=${pageLength}`
+      if(filterText !== '' && filterText !== null)
+        endpointUrl += `&agent_name=${filterText}`
+      fetch(
+        endpointUrl,
+        {
+          method: "GET"
+  
+        }
+      ).then(response => {
+        let totalCount = response.headers.get('X-Total-Count')
+        setTotalPages(Math.ceil(totalCount / pageLength))
+        return response.json()
+      }).then(response => {
+        setAgents(response)
+      }).catch(error => console.log(error))
+    }, 500)
+
+    return () => clearTimeout(delayDebounceFn)
+
+  }, [page, filterText])
+
+  const handleFilterTextChange = (filterText) => {
+    setFilterText(filterText)
+
+  }
+
+  const handleAvailableOnlyChange = (availableOnly) => {
+    setAvailableOnly(availableOnly)
+
+  }
+
+  const handlePageChange = (pageNumber) => {
+    setPage(pageNumber)
+    setSelectedAgentId()
+
+  }
+
+  const handleSelectedAgentChange = (e) => {
+    setSelectedAgentId(e.target.value)
+
+  }
+
+  return (
+    <div>
+      <SearchBar
+        filterText={filterText}
+        availableOnly={availableOnly}
+        onFilterTextChange={handleFilterTextChange}
+        onAvailablityChange={handleAvailableOnlyChange}
+      />
+      <AgentTable
+        agents={agents}
+        filterText={filterText}
+        availableOnly={availableOnly}
+        handleSelectedAgentChange={handleSelectedAgentChange}
+        selectedAgentId={selectedAgentId}
+      />
+      <PageNavigation
+        onPageChange={handlePageChange}
+        currentPage={page}
+        totalPages={totalPages}
+
+      />
+    </div>
+
+  );
+}
+
+export { FilterableZoomAgentTable }
