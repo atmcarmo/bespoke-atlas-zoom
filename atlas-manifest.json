@@ -1,6 +1,6 @@
 {
-  "id": "atlas-zoom",
-  "name": "atlas-zoom",
+  "id": "bespoke-atlas-zoom",
+  "name": "bespoke-atlas-zoom",
   "version": "0.0.0",
   "sdk-version": "0",
   "capabilities": ["authorization"],
@@ -9,5 +9,5 @@
     "icon": "https://cdn1.iconfinder.com/data/icons/miscicons/500/globe-512.png"
   },
   "src": "http://localhost:3000",
-  "slug": "atlas-zoom"
+  "slug": "bespoke-atlas-zoom"
 }
