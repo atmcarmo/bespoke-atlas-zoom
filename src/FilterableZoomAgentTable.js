@@ -1,72 +1,75 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Grid, Table, Checkbox, Pagination, Icon } from '@cobalt/cobalt-react-components'
+import {
+  Grid,
+  Table,
+  Checkbox,
+  Pagination,
+  Icon,
+} from "@cobalt/cobalt-react-components";
 
-import update from 'immutability-helper';
-
+import update from "immutability-helper";
 
 const AgentPhoneActive = (props) => {
-  const agentPhone = props.agentPhone
-  const telUri = `td+tel://${agentPhone}`
-  return (
-
-    <a href={telUri}> {agentPhone} </a>
-  )
-
-}
+  const agentPhone = props.agentPhone;
+  const telUri = `td+tel://${agentPhone}`;
+  return <a href={telUri}> {agentPhone} </a>;
+};
 
 const AgentPhone = (props) => {
-  const agentPhone = props.agentPhone
-  return (
-    <div> {agentPhone} </div>
-  )
-
-}
+  const agentPhone = props.agentPhone;
+  return <div> {agentPhone} </div>;
+};
 
 const AgentRow = (props) => {
-  const agent = props.agent
-  const statusColor = agent.presence_status ? 'co--green-600' : 'co--secondary-200'
-  const statusActive = agent.id === props.selectedAgentId ? true : false
-  const onSelectedAgentChange = props.onSelectedAgentChange
+  const agent = props.agent;
+  const statusColor = agent.presence_status
+    ? "co--green-600"
+    : "co--secondary-200";
+  const statusActive = agent.id === props.selectedAgentId ? true : false;
+  const onSelectedAgentChange = props.onSelectedAgentChange;
 
   return (
-    <Table.Row key={agent.id}
+    <Table.Row
+      key={agent.id}
       active={statusActive}
       onClick={() => {
         onSelectedAgentChange(agent.id);
-      }} >
-      <Table.Data> {agent.firstName} {agent.lastName} </Table.Data>
+      }}
+    >
       <Table.Data>
-        {statusActive
-          ?
-          <AgentPhoneActive
-            agentPhone={agent.phone} />
-          :
-          <AgentPhone
-            agentPhone={agent.phone} />
-        }
+        {" "}
+        {agent.firstName} {agent.lastName}{" "}
+      </Table.Data>
+      <Table.Data>
+        {statusActive ? (
+          <AgentPhoneActive agentPhone={agent.phone} />
+        ) : (
+          <AgentPhone agentPhone={agent.phone} />
+        )}
       </Table.Data>
       <Table.Data> {agent.email} </Table.Data>
       <Table.Data alignment={Table.Data.ALIGNMENT.CENTER}>
-        <Icon name="check_circle" color={statusColor} /> </Table.Data>
+        <Icon name="check_circle" color={statusColor} />{" "}
+      </Table.Data>
     </Table.Row>
-  )
-}
+  );
+};
 
 const AgentTable = (props) => {
-  const availableOnly = props.availableOnly
-  const agents = props.agents
+  const availableOnly = props.availableOnly;
+  const agents = props.agents;
 
-  const rows = []
+  const rows = [];
 
   agents.forEach((agent) => {
     if (availableOnly && agent.presence_status !== true) {
-      return
-
+      return;
     }
     rows.push(
-      <AgentRow key={agent.id}
+      <AgentRow
+        key={agent.id}
         agent={agent}
         onSelectedAgentChange={props.handleSelectedAgentChange}
         selectedAgentId={props.selectedAgentId}
@@ -75,37 +78,34 @@ const AgentTable = (props) => {
   });
 
   return (
-
     <Table selectable>
       <Table.Head>
         <Table.Row>
           <Table.Header> Agent </Table.Header>
           <Table.Header> Phone </Table.Header>
           <Table.Header> Email </Table.Header>
-          <Table.Header alignment={Table.Header.ALIGNMENT.CENTER}> Status </Table.Header>
+          <Table.Header alignment={Table.Header.ALIGNMENT.CENTER}>
+            {" "}
+            Status{" "}
+          </Table.Header>
         </Table.Row>
       </Table.Head>
-      <Table.Body>
-        {rows}
-      </Table.Body>
+      <Table.Body>{rows}</Table.Body>
     </Table>
-
-  )
-}
+  );
+};
 
 const SearchBar = (props) => {
-  const [t] = useTranslation()
+  const [t] = useTranslation();
 
   const handleFilterTextChange = (e) => {
-    props.onFilterTextChange(e.target.value)
-
-  }
+    props.onFilterTextChange(e.target.value);
+  };
 
   const handleAvailableOnlyChange = (e) => {
-    console.log(e)
-    props.onAvailablityChange(e.target.checked)
-
-  }
+    console.log(e);
+    props.onAvailablityChange(e.target.checked);
+  };
 
   return (
     <form>
@@ -116,23 +116,22 @@ const SearchBar = (props) => {
         onChange={handleFilterTextChange}
       />
       <Checkbox
-        value='availableOnly'
+        value="availableOnly"
         checked={props.availableOnly}
-        onChange={handleAvailableOnlyChange} >
-        {t('Only show available agents')}
+        onChange={handleAvailableOnlyChange}
+      >
+        {t("Only show available agents")}
       </Checkbox>
     </form>
-  )
-
-}
+  );
+};
 
 const PageNavigation = (props) => {
-  let currentPage = props.currentPage
-  let totalPages = props.totalPages
+  let currentPage = props.currentPage;
+  let totalPages = props.totalPages;
   const handlePageChange = (nextPage) => {
-    props.onPageChange(nextPage)
-
-  }
+    props.onPageChange(nextPage);
+  };
 
   return (
     <Pagination
@@ -141,78 +140,72 @@ const PageNavigation = (props) => {
       onPageClick={handlePageChange}
       fluid
     />
-
-  )
-
-}
+  );
+};
 
 const FilterableZoomAgentTable = (props) => {
-  const [filterText, setFilterText] = useState('')
-  const [availableOnly, setAvailableOnly] = useState(false)
-  const [page, setPage] = useState(1)
-  const [agents, setAgents] = useState([])
-  const [totalPages, setTotalPages] = useState(1)
-  const [selectedAgentId, setSelectedAgentId] = useState()
+  const [filterText, setFilterText] = useState("");
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [agents, setAgents] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedAgentId, setSelectedAgentId] = useState();
 
-  const pageLength = 10
+  const pageLength = 10;
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      let ENDPOINT_URL = process.env.REACT_APP_ENDPOINT
-      if (selectedAgentId)
-        ENDPOINT_URL += `?id=${selectedAgentId}`
+      let ENDPOINT_URL = process.env.REACT_APP_ENDPOINT;
+      if (selectedAgentId) ENDPOINT_URL += `?id=${selectedAgentId}`;
       else {
-        ENDPOINT_URL += `?_page=${page}&_limit=${pageLength}`
-        if (filterText !== '' && filterText !== null)
-          ENDPOINT_URL += `&agent_name=${filterText}`
+        ENDPOINT_URL += `?_page=${page}&_limit=${pageLength}`;
+        if (filterText !== "" && filterText !== null)
+          ENDPOINT_URL += `&agent_name=${filterText}`;
       }
-      fetch(
-        ENDPOINT_URL,
-        {
-          method: "GET"
+      fetch(ENDPOINT_URL, {
+        method: "GET",
+      })
+        .then((response) => {
+          let totalCount = response.headers.get("X-Total-Count");
+          setTotalPages(Math.ceil(totalCount / pageLength));
+          return response.json();
+        })
+        .then((response) => {
+          if (!selectedAgentId) setAgents(response);
+          else {
+            let agent = response[0];
+            const index = agents.findIndex(
+              (agent) => agent.id === selectedAgentId
+            );
+            const updatedAgents = update(agents, {
+              $splice: [[index, 1, agent]],
+            });
+            updatedAgents[index] = agent;
+            setAgents(updatedAgents);
+          }
+        })
+        .catch((error) => console.log(error));
+    }, 500);
 
-        }
-      ).then(response => {
-        let totalCount = response.headers.get('X-Total-Count')
-        setTotalPages(Math.ceil(totalCount / pageLength))
-        return response.json()
-      }).then(response => {
-        if (!selectedAgentId)
-          setAgents(response)
-        else {
-          let agent = response[0]
-          const index = agents.findIndex((agent) => agent.id === selectedAgentId)
-          const updatedAgents = update(agents, { $splice: [[index, 1, agent]] }); 
-          updatedAgents[index] = agent
-          setAgents(updatedAgents)
-        }
-      }).catch(error => console.log(error))
-    }, 500)
-
-    return () => clearTimeout(delayDebounceFn)
-
-  }, [page, filterText, selectedAgentId])
+    return () => clearTimeout(delayDebounceFn);
+  }, [page, filterText, selectedAgentId]);
 
   const handleFilterTextChange = (filterText) => {
-    setFilterText(filterText)
-
-  }
+    setFilterText(filterText);
+  };
 
   const handleAvailableOnlyChange = (availableOnly) => {
-    setAvailableOnly(availableOnly)
-
-  }
+    setAvailableOnly(availableOnly);
+  };
 
   const handlePageChange = (pageNumber) => {
-    setPage(pageNumber)
-    setSelectedAgentId()
-
-  }
+    setPage(pageNumber);
+    setSelectedAgentId();
+  };
 
   const handleSelectedAgentChange = (agentId) => {
-    setSelectedAgentId(agentId)
-
-  }
+    setSelectedAgentId(agentId);
+  };
 
   return (
     <Grid>
@@ -243,8 +236,7 @@ const FilterableZoomAgentTable = (props) => {
         </Grid.Column>
       </Grid.Group>
     </Grid>
-
   );
-}
+};
 
-export { FilterableZoomAgentTable }
+export { FilterableZoomAgentTable };

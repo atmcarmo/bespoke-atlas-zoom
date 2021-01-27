@@ -33,6 +33,7 @@
     "test:ci": "CI=true react-scripts test",
     "test:coverage": "CI=true react-scripts test --coverage",
     "lint": "yarn lint:format && yarn lint:eslint",
+    "lint:fix": "yarn lint:format && yarn lint:eslint --fix",
     "lint:dry": "yarn lint:format:dry && yarn lint:eslint",
     "lint:eslint": "eslint --ext .js src/",
     "lint:format": "prettier --write src/**/*.js",
