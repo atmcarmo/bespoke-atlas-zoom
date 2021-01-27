@@ -11,7 +11,7 @@ const AgentPhoneActive = (props) => {
   const telUri = `td+tel://${agentPhone}`
   return (
 
-    <a href={telUri}> {agentPhone} </a> 
+    <a href={telUri}> {agentPhone} </a>
   )
 
 }
@@ -31,18 +31,18 @@ const AgentRow = (props) => {
   const onSelectedAgentChange = props.onSelectedAgentChange
 
   return (
-    <Table.Row key={agent.id} 
-        active={statusActive} 
-        onClick={() => {
-          onSelectedAgentChange(agent.id);
-        }} >
+    <Table.Row key={agent.id}
+      active={statusActive}
+      onClick={() => {
+        onSelectedAgentChange(agent.id);
+      }} >
       <Table.Data> {agent.firstName} {agent.lastName} </Table.Data>
       <Table.Data>
-        {statusActive 
-        ?
+        {statusActive
+          ?
           <AgentPhoneActive
             agentPhone={agent.phone} />
-        :
+          :
           <AgentPhone
             agentPhone={agent.phone} />
         }
@@ -75,29 +75,29 @@ const AgentTable = (props) => {
   });
 
   return (
-    
-      <Table selectable>
-        <Table.Head>
-          <Table.Row>
-            <Table.Header> Agent </Table.Header>
-            <Table.Header> Phone </Table.Header>
-            <Table.Header> Email </Table.Header>
-            <Table.Header> Status </Table.Header>
-          </Table.Row>
-        </Table.Head>
-        <Table.Body>
-          {rows}
-        </Table.Body>
-      </Table>
+
+    <Table selectable>
+      <Table.Head>
+        <Table.Row>
+          <Table.Header> Agent </Table.Header>
+          <Table.Header> Phone </Table.Header>
+          <Table.Header> Email </Table.Header>
+          <Table.Header alignment={Table.Header.ALIGNMENT.CENTER}> Status </Table.Header>
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {rows}
+      </Table.Body>
+    </Table>
 
   )
 }
 
 const SearchBar = (props) => {
   const [t] = useTranslation()
-  
+
   const handleFilterTextChange = (e) => {
-     props.onFilterTextChange(e.target.value)
+    props.onFilterTextChange(e.target.value)
 
   }
 
@@ -159,31 +159,30 @@ const FilterableZoomAgentTable = (props) => {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       let endpointUrl = 'http://localhost:8000/agents?'
-      if(selectedAgentId)
+      if (selectedAgentId)
         endpointUrl += `id=${selectedAgentId}`
-      else{
+      else {
         endpointUrl += `_page=${page}&_limit=${pageLength}`
-        if(filterText !== '' && filterText !== null)
+        if (filterText !== '' && filterText !== null)
           endpointUrl += `&agent_name=${filterText}`
       }
       fetch(
         endpointUrl,
         {
           method: "GET"
-  
+
         }
       ).then(response => {
         let totalCount = response.headers.get('X-Total-Count')
         setTotalPages(Math.ceil(totalCount / pageLength))
         return response.json()
       }).then(response => {
-        if(!selectedAgentId)
+        if (!selectedAgentId)
           setAgents(response)
-        else{
+        else {
           let agent = response[0]
           const index = agents.findIndex((agent) => agent.id === selectedAgentId)
-
-          const updatedAgents = update(agents, {$splice: [[index, 1, agent]]});  // array.splice(start, deleteCount, item1)
+          const updatedAgents = update(agents, { $splice: [[index, 1, agent]] });  // array.splice(start, deleteCount, item1)
           updatedAgents[index] = agent
           setAgents(updatedAgents)
         }
@@ -216,25 +215,33 @@ const FilterableZoomAgentTable = (props) => {
   }
 
   return (
-    <Grid fullWidth>
-      <SearchBar
-        filterText={filterText}
-        availableOnly={availableOnly}
-        onFilterTextChange={handleFilterTextChange}
-        onAvailablityChange={handleAvailableOnlyChange}
-      />
-      <AgentTable
-        agents={agents}
-        filterText={filterText}
-        availableOnly={availableOnly}
-        handleSelectedAgentChange={handleSelectedAgentChange}
-        selectedAgentId={selectedAgentId}
-      />
-      <PageNavigation
-        onPageChange={handlePageChange}
-        currentPage={page}
-        totalPages={totalPages}
-      />
+    <Grid>
+      <Grid.Group>
+        <Grid.Column all={100}>
+          <SearchBar
+            filterText={filterText}
+            availableOnly={availableOnly}
+            onFilterTextChange={handleFilterTextChange}
+            onAvailablityChange={handleAvailableOnlyChange}
+          />
+        </Grid.Column>
+        <Grid.Column>
+          <AgentTable
+            agents={agents}
+            filterText={filterText}
+            availableOnly={availableOnly}
+            handleSelectedAgentChange={handleSelectedAgentChange}
+            selectedAgentId={selectedAgentId}
+          />
+        </Grid.Column>
+        <Grid.Column pushCenter all={100}>
+          <PageNavigation
+            onPageChange={handlePageChange}
+            currentPage={page}
+            totalPages={totalPages}
+          />
+        </Grid.Column>
+      </Grid.Group>
     </Grid>
 
   );
