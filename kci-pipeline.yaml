@@ -1,6 +1,6 @@
 Notifications:
   - channels:
-      - admin-dev-alerts
+      - proserv-devs
     when:
       - staging
       - master
@@ -10,7 +10,7 @@ Notifications:
       - SUCCESS
       - ABORTED
   - channels:
-      - admin-prod-alerts
+      - proserv-devs 
     when:
       - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
     status:
@@ -86,14 +86,6 @@ Deploy phase:
     stages:
       Upload assets to S3 [STG]:
         type: deploy_s3
-        when:
-          - staging
-      Upload source maps to Bugsnag [STG]:
-        type: generic
-        steps:
-          - yarn install
-          - yarn build:staging
-          - yarn run upload-sourcemaps:staging
         when:
           - staging
   qa:
