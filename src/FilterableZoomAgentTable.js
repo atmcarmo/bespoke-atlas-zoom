@@ -158,16 +158,16 @@ const FilterableZoomAgentTable = (props) => {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      let endpointUrl = 'http://localhost:8000/agents?'
+      let ENDPOINT_URL = process.env.REACT_APP_ENDPOINT
       if (selectedAgentId)
-        endpointUrl += `id=${selectedAgentId}`
+        ENDPOINT_URL += `?id=${selectedAgentId}`
       else {
-        endpointUrl += `_page=${page}&_limit=${pageLength}`
+        ENDPOINT_URL += `?_page=${page}&_limit=${pageLength}`
         if (filterText !== '' && filterText !== null)
-          endpointUrl += `&agent_name=${filterText}`
+          ENDPOINT_URL += `&agent_name=${filterText}`
       }
       fetch(
-        endpointUrl,
+        ENDPOINT_URL,
         {
           method: "GET"
 
@@ -182,7 +182,7 @@ const FilterableZoomAgentTable = (props) => {
         else {
           let agent = response[0]
           const index = agents.findIndex((agent) => agent.id === selectedAgentId)
-          const updatedAgents = update(agents, { $splice: [[index, 1, agent]] });  // array.splice(start, deleteCount, item1)
+          const updatedAgents = update(agents, { $splice: [[index, 1, agent]] }); 
           updatedAgents[index] = agent
           setAgents(updatedAgents)
         }
@@ -217,7 +217,7 @@ const FilterableZoomAgentTable = (props) => {
   return (
     <Grid>
       <Grid.Group>
-        <Grid.Column all={100}>
+        <Grid.Column all="100">
           <SearchBar
             filterText={filterText}
             availableOnly={availableOnly}
@@ -234,7 +234,7 @@ const FilterableZoomAgentTable = (props) => {
             selectedAgentId={selectedAgentId}
           />
         </Grid.Column>
-        <Grid.Column pushCenter all={100}>
+        <Grid.Column pushCenter all="100">
           <PageNavigation
             onPageChange={handlePageChange}
             currentPage={page}
