@@ -1,0 +1,128 @@
+Notifications:
+  - channels:
+      - admin-dev-alerts
+    when:
+      - staging
+      - master
+    status:
+      - FAILURE
+      - BACK_TO_NORMAL
+      - SUCCESS
+      - ABORTED
+  - channels:
+      - admin-prod-alerts
+    when:
+      - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
+    status:
+      - FAILURE
+      - BACK_TO_NORMAL
+      - SUCCESS
+      - ABORTED
+
+image: node:14.15.0-stretch-slim
+
+Build phase:
+  stages:
+    Setup:
+      type: generic
+      steps:
+        - yarn install
+
+    Static Analysis Tests:
+      type: static_tests
+      steps:
+        - yarn run lint:dry
+
+    Unit Tests:
+      type: tests
+      steps:
+        - yarn run test:coverage
+      report html: coverage/index.html
+
+    Build [STG]:
+      type: raw_build
+      when:
+        - staging
+      environments:
+        - stg
+      steps:
+        - yarn build:staging
+        - mkdir -p $OUTPUT_PATH_ARTIFACTS
+        - cp -a ./build/. ${OUTPUT_PATH_ARTIFACTS}
+
+    Build [QA]:
+      type: raw_build
+      when:
+        - master
+      environments:
+        - qa
+      steps:
+        - yarn build:qa
+        - mkdir -p $OUTPUT_PATH_ARTIFACTS
+        - cp -a ./build/. ${OUTPUT_PATH_ARTIFACTS}
+
+    Build [PRD]:
+      type: raw_build
+      when:
+        - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
+      environments:
+        - prd
+      steps:
+        - yarn build:production
+        - mkdir -p $OUTPUT_PATH_ARTIFACTS
+        - cp -a ./build/. ${OUTPUT_PATH_ARTIFACTS}
+
+    # Publishing will occur in every environment
+    Publish:
+      type: raw_push
+      when:
+        - staging
+        - master
+        - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
+
+Deploy phase:
+  stg:
+    deploy mode: automatic
+    stages:
+      Upload assets to S3 [STG]:
+        type: deploy_s3
+        when:
+          - staging
+      Upload source maps to Bugsnag [STG]:
+        type: generic
+        steps:
+          - yarn install
+          - yarn build:staging
+          - yarn run upload-sourcemaps:staging
+        when:
+          - staging
+  qa:
+    deploy mode: automatic
+    stages:
+      Upload assets to S3 [QA]:
+        type: deploy_s3
+        when:
+          - master
+      Upload source maps to Bugsnag [QA]:
+        type: generic
+        steps:
+          - yarn install
+          - yarn build:qa
+          - yarn run upload-sourcemaps:qa
+        when:
+          - master
+  prd:
+    deploy mode: automatic
+    stages:
+      Upload assets to S3 [PRD]:
+        type: deploy_s3
+        when:
+          - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
+      Upload source maps to Bugsnag [PRD]:
+        type: generic
+        steps:
+          - yarn install
+          - yarn build:production
+          - yarn run upload-sourcemaps:production
+        when:
+          - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$

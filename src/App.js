@@ -36,7 +36,7 @@ function AppHeader() {
       <Header.Heading>
         <Header.Title>
           <H1>
-            {t('Zoom-Talkdesk Integration')}
+            {t('Zoom-Talkdesk')}
           </H1>
         </Header.Title>
       </Header.Heading>
