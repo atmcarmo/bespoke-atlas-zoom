@@ -155,10 +155,14 @@ const FilterableZoomAgentTable = (props) => {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      let ENDPOINT_URL = process.env.REACT_APP_ENDPOINT;
-      if (selectedAgentId) ENDPOINT_URL += `?id=${selectedAgentId}`;
+      let ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_BASE;
+      const PAGE_QUERY_PARAM = process.env.REACT_APP_PAGE_QUERY_PARAM;
+      const LIMIT_QUERY_PARAM = process.env.REACT_APP_LIMIT_QUERY_PARAM;
+      const AGENT_ID_QUERY_PARAM = process.env.REACT_APP_AGENT_ID_QUERY_PARAM;
+      if (selectedAgentId) 
+        ENDPOINT_URL += `/agent?${AGENT_ID_QUERY_PARAM}=${selectedAgentId}`;
       else {
-        ENDPOINT_URL += `?_page=${page}&_limit=${pageLength}`;
+        ENDPOINT_URL += `/agents?${PAGE_QUERY_PARAM}=${page}&${LIMIT_QUERY_PARAM}=${pageLength}`;
         if (filterText !== "" && filterText !== null)
           ENDPOINT_URL += `&agent_name=${filterText}`;
       }
