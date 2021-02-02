@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import HttpClient from "./config/http.client";
 
 import { useTranslation } from "react-i18next";
 import {
@@ -143,7 +144,7 @@ const PageNavigation = (props) => {
   );
 };
 
-const FilterableZoomAgentTable = (props) => {
+const FilterableZoomAgentTable = async (props) => {
   const [filterText, setFilterText] = useState("");
   const [availableOnly, setAvailableOnly] = useState(false);
   const [page, setPage] = useState(1);
@@ -152,43 +153,12 @@ const FilterableZoomAgentTable = (props) => {
   const [selectedAgentId, setSelectedAgentId] = useState();
 
   const pageLength = 10;
-
+  // 2,8: import HttpClient from "./config/http.client";
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      let ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_BASE;
-      const PAGE_QUERY_PARAM = process.env.REACT_APP_PAGE_QUERY_PARAM;
-      const LIMIT_QUERY_PARAM = process.env.REACT_APP_LIMIT_QUERY_PARAM;
-      const AGENT_ID_QUERY_PARAM = process.env.REACT_APP_AGENT_ID_QUERY_PARAM;
-      if (selectedAgentId)
-        ENDPOINT_URL += `/agent?${AGENT_ID_QUERY_PARAM}=${selectedAgentId}`;
-      else {
-        ENDPOINT_URL += `/agents?${PAGE_QUERY_PARAM}=${page}&${LIMIT_QUERY_PARAM}=${pageLength}`;
-        if (filterText !== "" && filterText !== null)
-          ENDPOINT_URL += `&agent_name=${filterText}`;
-      }
-      fetch(ENDPOINT_URL, {
-        method: "GET",
-      })
-        .then((response) => {
-          let totalCount = response.headers.get("X-Total-Count");
-          setTotalPages(Math.ceil(totalCount / pageLength));
-          return response.json();
-        })
-        .then((response) => {
-          if (!selectedAgentId) setAgents(response);
-          else {
-            let agent = response[0];
-            const index = agents.findIndex(
-              (agent) => agent.id === selectedAgentId
-            );
-            const updatedAgents = update(agents, {
-              $splice: [[index, 1, agent]],
-            });
-            updatedAgents[index] = agent;
-            setAgents(updatedAgents);
-          }
-        })
-        .catch((error) => console.log(error));
+      HttpClient.instance.get("bespoke/zoom").then((data) => {
+        console.log(JSON.stringify(data));
+      });
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
