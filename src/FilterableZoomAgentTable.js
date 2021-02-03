@@ -10,6 +10,7 @@ import {
 } from "@cobalt/cobalt-react-components";
 
 import update from "immutability-helper";
+import TokenGenerator from "./token.generator";
 
 const AgentPhoneActive = (props) => {
   const agentPhone = props.agentPhone;
@@ -166,8 +167,12 @@ const FilterableZoomAgentTable = (props) => {
         if (filterText !== "" && filterText !== null)
           ENDPOINT_URL += `&agent_name=${filterText}`;
       }
+      const accessToken = await TokenGenerator.get();
       fetch(ENDPOINT_URL, {
         method: "GET",
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
       })
         .then((response) => {
           let totalCount = response.headers.get("X-Total-Count");
