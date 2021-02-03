@@ -25,9 +25,8 @@ const AgentPhone = (props) => {
 
 const AgentRow = (props) => {
   const agent = props.agent;
-  const statusColor = agent.presence === "Available"
-    ? "co--green-600"
-    : "co--secondary-200";
+  const statusColor =
+    agent.presence === "Available" ? "co--green-600" : "co--secondary-200";
   const statusActive = agent.zoomId === props.selectedAgentId ? true : false;
   const onSelectedAgentChange = props.onSelectedAgentChange;
 
