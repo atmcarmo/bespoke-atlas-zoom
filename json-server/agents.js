@@ -9,6 +9,7 @@ function generateAgents () {
     let lastName = faker.name.lastName()
     let email = faker.internet.email()
     let phone = faker.phone.phoneNumber("+1-###-###-####")
+    let extension = faker.phone.phoneNumber("####")
     let presenceStatus = faker.random.boolean()
     agents.push({
       "id": id.toString(),
@@ -16,6 +17,7 @@ function generateAgents () {
       "lastName": lastName,
       "email": email,
       "phone": phone,
+      "extension": extension,
       "presence_status":  presenceStatus
     })
   }

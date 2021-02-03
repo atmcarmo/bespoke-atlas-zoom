@@ -50,6 +50,13 @@ const AgentRow = (props) => {
           <AgentPhone agentPhone={agent.phone} />
         )}
       </Table.Data>
+      <Table.Data> 
+       {statusActive ? (
+          <AgentPhoneActive agentPhone={agent.extension} />
+        ) : (
+          <AgentPhone agentPhone={agent.extension} />
+        )} 
+      </Table.Data>
       <Table.Data> {agent.email} </Table.Data>
       <Table.Data alignment={Table.Data.ALIGNMENT.CENTER}>
         <Icon name="check_circle" color={statusColor} />{" "}
@@ -84,6 +91,7 @@ const AgentTable = (props) => {
         <Table.Row>
           <Table.Header> Agent </Table.Header>
           <Table.Header> Phone </Table.Header>
+          <Table.Header> Extension </Table.Header>
           <Table.Header> Email </Table.Header>
           <Table.Header alignment={Table.Header.ALIGNMENT.CENTER}>
             {" "}
