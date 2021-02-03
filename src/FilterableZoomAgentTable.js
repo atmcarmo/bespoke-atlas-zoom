@@ -50,12 +50,12 @@ const AgentRow = (props) => {
           <AgentPhone agentPhone={agent.phone} />
         )}
       </Table.Data>
-      <Table.Data> 
-       {statusActive ? (
+      <Table.Data>
+        {statusActive ? (
           <AgentPhoneActive agentPhone={agent.extension} />
         ) : (
           <AgentPhone agentPhone={agent.extension} />
-        )} 
+        )}
       </Table.Data>
       <Table.Data> {agent.email} </Table.Data>
       <Table.Data alignment={Table.Data.ALIGNMENT.CENTER}>
