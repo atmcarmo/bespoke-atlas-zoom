@@ -28,15 +28,15 @@ const AgentRow = (props) => {
   const statusColor = agent.presence_status
     ? "co--green-600"
     : "co--secondary-200";
-  const statusActive = agent.id === props.selectedAgentId ? true : false;
+  const statusActive = agent.zoomId === props.selectedAgentId ? true : false;
   const onSelectedAgentChange = props.onSelectedAgentChange;
 
   return (
     <Table.Row
-      key={agent.id}
+      key={agent.zoomId}
       active={statusActive}
       onClick={() => {
-        onSelectedAgentChange(agent.id);
+        onSelectedAgentChange(agent.zoomId);
       }}
     >
       <Table.Data>
@@ -77,7 +77,7 @@ const AgentTable = (props) => {
     }
     rows.push(
       <AgentRow
-        key={agent.id}
+        key={agent.zoomId}
         agent={agent}
         onSelectedAgentChange={props.handleSelectedAgentChange}
         selectedAgentId={props.selectedAgentId}
@@ -192,7 +192,7 @@ const FilterableZoomAgentTable = (props) => {
             else {
               let agent = response[0];
               const index = agents.findIndex(
-                (agent) => agent.id === selectedAgentId
+                (agent) => agent.zoomId === selectedAgentId
               );
               const updatedAgents = update(agents, {
                 $splice: [[index, 1, agent]],
