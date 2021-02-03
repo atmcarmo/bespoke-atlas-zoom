@@ -169,6 +169,7 @@ const FilterableZoomAgentTable = (props) => {
       }
       TokenGenerator.get().then((accessToken) => {
         fetch(ENDPOINT_URL, {
+          modee: "no-cors",
           method: "GET",
           headers: {
             Authorization: `Bearer ${accessToken}`,
