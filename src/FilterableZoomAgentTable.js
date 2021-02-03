@@ -188,7 +188,7 @@ const FilterableZoomAgentTable = (props) => {
           .then((response) => {
             if (!selectedAgentId) setAgents(response);
             else {
-              let agent = response[0];
+              let agent = response;
               const index = agents.findIndex(
                 (agent) => agent.zoomId === selectedAgentId
               );
