@@ -10,7 +10,7 @@ import {
 } from "@cobalt/cobalt-react-components";
 
 import update from "immutability-helper";
-import TokenGenerator from "./token.generator";
+import TokenGenerator from "./config/token.generator";
 
 const AgentPhoneActive = (props) => {
   const agentPhone = props.agentPhone;
@@ -167,33 +167,34 @@ const FilterableZoomAgentTable = (props) => {
         if (filterText !== "" && filterText !== null)
           ENDPOINT_URL += `&agent_name=${filterText}`;
       }
-      const accessToken = await TokenGenerator.get();
-      fetch(ENDPOINT_URL, {
-        method: "GET",
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      })
-        .then((response) => {
-          let totalCount = response.headers.get("X-Total-Count");
-          setTotalPages(Math.ceil(totalCount / pageLength));
-          return response.json();
+      TokenGenerator.get().then((accessToken) => {
+        fetch(ENDPOINT_URL, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         })
-        .then((response) => {
-          if (!selectedAgentId) setAgents(response);
-          else {
-            let agent = response[0];
-            const index = agents.findIndex(
-              (agent) => agent.id === selectedAgentId
-            );
-            const updatedAgents = update(agents, {
-              $splice: [[index, 1, agent]],
-            });
-            updatedAgents[index] = agent;
-            setAgents(updatedAgents);
-          }
-        })
-        .catch((error) => console.log(error));
+          .then((response) => {
+            let totalCount = response.headers.get("X-Total-Count");
+            setTotalPages(Math.ceil(totalCount / pageLength));
+            return response.json();
+          })
+          .then((response) => {
+            if (!selectedAgentId) setAgents(response);
+            else {
+              let agent = response[0];
+              const index = agents.findIndex(
+                (agent) => agent.id === selectedAgentId
+              );
+              const updatedAgents = update(agents, {
+                $splice: [[index, 1, agent]],
+              });
+              updatedAgents[index] = agent;
+              setAgents(updatedAgents);
+            }
+          })
+          .catch((error) => console.log(error));
+      });
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
