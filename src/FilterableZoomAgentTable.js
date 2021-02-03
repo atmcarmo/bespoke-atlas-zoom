@@ -168,7 +168,7 @@ const FilterableZoomAgentTable = (props) => {
       const LIMIT_QUERY_PARAM = process.env.REACT_APP_LIMIT_QUERY_PARAM;
       const AGENT_ID_QUERY_PARAM = process.env.REACT_APP_AGENT_ID_QUERY_PARAM;
       if (selectedAgentId)
-        ENDPOINT_URL += `/agent?${AGENT_ID_QUERY_PARAM}=${selectedAgentId}`;
+        ENDPOINT_URL += `/agents/${selectedAgentId}`;
       else {
         ENDPOINT_URL += `/agents?${PAGE_QUERY_PARAM}=${page}&${LIMIT_QUERY_PARAM}=${pageLength}`;
         if (filterText !== "" && filterText !== null)
