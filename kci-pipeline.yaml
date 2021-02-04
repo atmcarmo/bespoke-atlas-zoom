@@ -95,26 +95,10 @@ Deploy phase:
         type: deploy_s3
         when:
           - master
-      Upload source maps to Bugsnag [QA]:
-        type: generic
-        steps:
-          - yarn install
-          - yarn build:qa
-          - yarn run upload-sourcemaps:qa
-        when:
-          - master
   prd:
     deploy mode: automatic
     stages:
       Upload assets to S3 [PRD]:
         type: deploy_s3
-        when:
-          - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
-      Upload source maps to Bugsnag [PRD]:
-        type: generic
-        steps:
-          - yarn install
-          - yarn build:production
-          - yarn run upload-sourcemaps:production
         when:
           - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
