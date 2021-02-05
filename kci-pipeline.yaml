@@ -3,7 +3,6 @@ Notifications:
       - bespoke-devs
     when:
       - staging
-      - qa
       - master
     status:
       - FAILURE
