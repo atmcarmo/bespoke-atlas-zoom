@@ -116,10 +116,7 @@ const SearchBar = (props) => {
 
   return (
     <Form>
-      <TextInput
-        value={props.filterText}
-        onChange={handleFilterTextChange}
-      />
+      <TextInput value={props.filterText} onChange={handleFilterTextChange} />
       <Checkbox
         value="availableOnly"
         checked={props.availableOnly}
