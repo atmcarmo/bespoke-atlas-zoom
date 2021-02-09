@@ -7,6 +7,8 @@ import {
   Checkbox,
   Pagination,
   Icon,
+  TextInput,
+  Form,
 } from "@cobalt/cobalt-react-components";
 
 import TokenGenerator from "./config/token.generator";
@@ -109,15 +111,12 @@ const SearchBar = (props) => {
   };
 
   const handleAvailableOnlyChange = (e) => {
-    console.log(e);
     props.onAvailablityChange(e.target.checked);
   };
 
   return (
-    <form>
-      <input
-        type="text"
-        placeholder="Search..."
+    <Form>
+      <TextInput
         value={props.filterText}
         onChange={handleFilterTextChange}
       />
@@ -128,7 +127,7 @@ const SearchBar = (props) => {
       >
         {t("Only show available agents")}
       </Checkbox>
-    </form>
+    </Form>
   );
 };
 
@@ -150,7 +149,7 @@ const PageNavigation = (props) => {
 };
 
 const FilterableZoomAgentTable = (props) => {
-  const [filterText, setFilterText] = useState("");
+  const [filterText, setFilterText] = useState();
   const [availableOnly, setAvailableOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [agents, setAgents] = useState([]);
