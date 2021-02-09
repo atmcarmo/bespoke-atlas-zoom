@@ -54,6 +54,7 @@
     ]
   },
   "devDependencies": {
-    "faker": "^5.1.0"
+    "faker": "^5.1.0",
+    "td-npm-publisher": "^0.2.1-RC.0"
   }
 }
