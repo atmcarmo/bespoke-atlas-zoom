@@ -7,9 +7,10 @@ import {
   Checkbox,
   Pagination,
   Icon,
+  TextInput,
+  Form,
 } from "@cobalt/cobalt-react-components";
 
-import update from "immutability-helper";
 import TokenGenerator from "./config/token.generator";
 
 const AgentPhoneActive = (props) => {
@@ -29,7 +30,6 @@ const AgentRow = (props) => {
     agent.presence === "Available" ? "co--green-600" : "co--secondary-200";
   const statusActive = agent.zoomId === props.selectedAgentId ? true : false;
   const onSelectedAgentChange = props.onSelectedAgentChange;
-
   return (
     <Table.Row
       key={agent.zoomId}
@@ -71,7 +71,7 @@ const AgentTable = (props) => {
   const rows = [];
 
   agents.forEach((agent) => {
-    if (availableOnly && agent.presence !== true) {
+    if (availableOnly && agent.presence !== "Available") {
       return;
     }
     rows.push(
@@ -111,18 +111,12 @@ const SearchBar = (props) => {
   };
 
   const handleAvailableOnlyChange = (e) => {
-    console.log(e);
     props.onAvailablityChange(e.target.checked);
   };
 
   return (
-    <form>
-      <input
-        type="text"
-        placeholder="Search..."
-        value={props.filterText}
-        onChange={handleFilterTextChange}
-      />
+    <Form>
+      <TextInput value={props.filterText} onChange={handleFilterTextChange} />
       <Checkbox
         value="availableOnly"
         checked={props.availableOnly}
@@ -130,7 +124,7 @@ const SearchBar = (props) => {
       >
         {t("Only show available agents")}
       </Checkbox>
-    </form>
+    </Form>
   );
 };
 
@@ -152,27 +146,22 @@ const PageNavigation = (props) => {
 };
 
 const FilterableZoomAgentTable = (props) => {
-  const [filterText, setFilterText] = useState("");
+  const [filterText, setFilterText] = useState();
   const [availableOnly, setAvailableOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [agents, setAgents] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedAgentId, setSelectedAgentId] = useState();
 
+  const PAGE_QUERY_PARAM = process.env.REACT_APP_PAGE_QUERY_PARAM;
+  const LIMIT_QUERY_PARAM = process.env.REACT_APP_LIMIT_QUERY_PARAM;
+  const ENDPOINT_BASE_URL = process.env.REACT_APP_ENDPOINT_BASE;
+
   const pageLength = 10;
-  // 2,8: import HttpClient from "./config/http.client";
+
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      let ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_BASE;
-      const PAGE_QUERY_PARAM = process.env.REACT_APP_PAGE_QUERY_PARAM;
-      const LIMIT_QUERY_PARAM = process.env.REACT_APP_LIMIT_QUERY_PARAM;
-      if (selectedAgentId && (filterText === "" || filterText === null))
-        ENDPOINT_URL += `/agents/${selectedAgentId}`;
-      else {
-        ENDPOINT_URL += `/agents?${PAGE_QUERY_PARAM}=${page}&${LIMIT_QUERY_PARAM}=${pageLength}`;
-        if (filterText !== "" && filterText !== null)
-          ENDPOINT_URL += `&agent_name=${filterText}`;
-      }
+    if (typeof selectedAgentId !== "undefined") {
+      let ENDPOINT_URL = `${ENDPOINT_BASE_URL}/agents/${selectedAgentId}`;
       TokenGenerator.get().then((accessToken) => {
         fetch(ENDPOINT_URL, {
           method: "GET",
@@ -185,26 +174,42 @@ const FilterableZoomAgentTable = (props) => {
             setTotalPages(Math.ceil(totalCount / pageLength));
             return response.json();
           })
+          .then((data) => {
+            const index = agents.findIndex(
+              (agent) => agent.id === selectedAgentId
+            );
+            agents[index] = data;
+          })
+          .catch((error) => console.log(error));
+      });
+    }
+  }, [selectedAgentId]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      let ENDPOINT_URL = `${ENDPOINT_BASE_URL}/agents?${PAGE_QUERY_PARAM}=${page}&${LIMIT_QUERY_PARAM}=${pageLength}`;
+      if (filterText !== "" && typeof filterText !== "undefined")
+        ENDPOINT_URL += `&agentName=${filterText}`;
+      TokenGenerator.get().then((accessToken) => {
+        fetch(ENDPOINT_URL, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
           .then((response) => {
-            if (!selectedAgentId) setAgents(response);
-            else {
-              let agent = response;
-              const index = agents.findIndex(
-                (agent) => agent.zoomId === selectedAgentId
-              );
-              const updatedAgents = update(agents, {
-                $splice: [[index, 1, agent]],
-              });
-              updatedAgents[index] = agent;
-              setAgents(updatedAgents);
-            }
+            let totalCount = response.headers.get("X-Total-Count");
+            setTotalPages(Math.ceil(totalCount / pageLength));
+            return response.json();
+          })
+          .then((data) => {
+            setAgents(data);
           })
           .catch((error) => console.log(error));
       });
     }, 500);
-
     return () => clearTimeout(delayDebounceFn);
-  }, [page, filterText, selectedAgentId]);
+  }, [filterText, page]);
 
   const handleFilterTextChange = (filterText) => {
     setFilterText(filterText);

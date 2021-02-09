@@ -12,7 +12,8 @@ json-server can be run locally and provide responses to mimic the bespoke-zoom A
 ```
 # install json-server npm globally ( only the first time )
 % npm install -g json-server
-% json-server --watch --port 8000 json-server/agents.js
+% json-server json-server/agents.js --port 8000 --id=zoomId
+% npm start
 
 ```
 > From the browser, you can navigate to http://localhost:8000/agents
