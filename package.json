@@ -30,7 +30,13 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start:atlas": "atlas launch --config=./atlas-dev-configuration.json --app-manifest=./atlas-manifest.json --menu-definition=./menu-definition.json",
-    "start:app": "BROWSER=none env-cmd -f .env.staging react-scripts start"
+    "start:app": "BROWSER=none env-cmd -f .env.staging react-scripts start",
+    "release:create": "td-npm-publisher create -p ./ -r ../../ --prefix=atlas-sdk",
+    "release:bump": "yarn release:create -i bump --prerelease",
+    "release:patch": "yarn release:create -i patch",
+    "release:minor": "yarn release:create -i minor",
+    "release:major": "yarn release:create -i major",
+    "release:deploy": "td-npm-publisher deploy -p ./ -r ../../ --prefix=atlas-sdk"
   },
   "eslintConfig": {
     "extends": "react-app"
