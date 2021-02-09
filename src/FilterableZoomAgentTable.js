@@ -152,17 +152,16 @@ const FilterableZoomAgentTable = (props) => {
   const [agents, setAgents] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedAgentId, setSelectedAgentId] = useState();
-
   const PAGE_QUERY_PARAM =
-    typeof process.env.REACT_APP_PAGE_QUERY_PARAM === "undefined"
+    typeof process.env.REACT_APP_PAGE_QUERY_PARAM !== "undefined"
       ? process.env.REACT_APP_PAGE_QUERY_PARAM
       : "_page";
   const LIMIT_QUERY_PARAM =
-    typeof process.env.REACT_APP_LIMIT_QUERY_PARAM === "undefined"
+    typeof process.env.REACT_APP_LIMIT_QUERY_PARAM !== "undefined"
       ? process.env.REACT_APP_LIMIT_QUERY_PARAM
       : "_limit";
   const ENDPOINT_BASE_URL =
-    typeof process.env.REACT_APP_ENDPOINT_BASE === "undefined"
+    typeof process.env.REACT_APP_ENDPOINT_BASE !== "undefined"
       ? process.env.REACT_APP_ENDPOINT_BASE
       : "http://localhost:8000";
 
