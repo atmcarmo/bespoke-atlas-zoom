@@ -2,6 +2,9 @@
   "name": "bespoke-atlas-zoom",
   "version": "0.1.1",
   "private": true,
+  "engines": {
+    "node": ">=14.15.0"
+  },
   "dependencies": {
     "@atlas/cli": "^1.8.0",
     "@atlas/sdk": "^0.13.1",
