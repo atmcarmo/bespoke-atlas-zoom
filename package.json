@@ -39,12 +39,12 @@
     "lint:format": "prettier --write src/**/*.js",
     "lint:format:dry": "prettier --check 'src/**/*.js'",
     "eject": "react-scripts eject",
-    "release:create": "td-npm-publisher create",
+    "release:create": "td-npm-publisher create -p ./ -r ./ --prefix=bespoke-atlas-zoom",
     "release:bump": "yarn release:create -i bump --prerelease",
     "release:patch": "yarn release:create -i patch",
     "release:minor": "yarn release:create -i minor",
     "release:major": "yarn release:create -i major",
-    "release:deploy": "td-npm-publisher deploy"
+    "release:deploy": "td-npm-publisher deploy -p ./ -r ./ --prefix=bespoke-atlas-zoom"
   },
   "eslintConfig": {
     "extends": "react-app"
