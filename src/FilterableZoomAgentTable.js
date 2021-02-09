@@ -9,7 +9,6 @@ import {
   Icon,
 } from "@cobalt/cobalt-react-components";
 
-import update from "immutability-helper";
 import TokenGenerator from "./config/token.generator";
 
 const AgentPhoneActive = (props) => {
@@ -29,7 +28,6 @@ const AgentRow = (props) => {
     agent.presence === "Available" ? "co--green-600" : "co--secondary-200";
   const statusActive = agent.zoomId === props.selectedAgentId ? true : false;
   const onSelectedAgentChange = props.onSelectedAgentChange;
-
   return (
     <Table.Row
       key={agent.zoomId}
@@ -71,7 +69,7 @@ const AgentTable = (props) => {
   const rows = [];
 
   agents.forEach((agent) => {
-    if (availableOnly && agent.presence !== true) {
+    if (availableOnly && agent.presence !== "Available") {
       return;
     }
     rows.push(
@@ -159,20 +157,24 @@ const FilterableZoomAgentTable = (props) => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedAgentId, setSelectedAgentId] = useState();
 
+  const PAGE_QUERY_PARAM =
+    typeof process.env.REACT_APP_PAGE_QUERY_PARAM === "undefined"
+      ? process.env.REACT_APP_PAGE_QUERY_PARAM
+      : "_page";
+  const LIMIT_QUERY_PARAM =
+    typeof process.env.REACT_APP_LIMIT_QUERY_PARAM === "undefined"
+      ? process.env.REACT_APP_LIMIT_QUERY_PARAM
+      : "_limit";
+  const ENDPOINT_BASE_URL =
+    typeof process.env.REACT_APP_ENDPOINT_BASE === "undefined"
+      ? process.env.REACT_APP_ENDPOINT_BASE
+      : "http://localhost:8000";
+
   const pageLength = 10;
-  // 2,8: import HttpClient from "./config/http.client";
+
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      let ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_BASE;
-      const PAGE_QUERY_PARAM = process.env.REACT_APP_PAGE_QUERY_PARAM;
-      const LIMIT_QUERY_PARAM = process.env.REACT_APP_LIMIT_QUERY_PARAM;
-      if (selectedAgentId && (filterText === "" || filterText === null))
-        ENDPOINT_URL += `/agents/${selectedAgentId}`;
-      else {
-        ENDPOINT_URL += `/agents?${PAGE_QUERY_PARAM}=${page}&${LIMIT_QUERY_PARAM}=${pageLength}`;
-        if (filterText !== "" && filterText !== null)
-          ENDPOINT_URL += `&agent_name=${filterText}`;
-      }
+    if (typeof selectedAgentId !== "undefined") {
+      let ENDPOINT_URL = `${ENDPOINT_BASE_URL}/agents/${selectedAgentId}`;
       TokenGenerator.get().then((accessToken) => {
         fetch(ENDPOINT_URL, {
           method: "GET",
@@ -185,26 +187,42 @@ const FilterableZoomAgentTable = (props) => {
             setTotalPages(Math.ceil(totalCount / pageLength));
             return response.json();
           })
+          .then((data) => {
+            const index = agents.findIndex(
+              (agent) => agent.id === selectedAgentId
+            );
+            agents[index] = data;
+          })
+          .catch((error) => console.log(error));
+      });
+    }
+  }, [selectedAgentId]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      let ENDPOINT_URL = `${ENDPOINT_BASE_URL}/agents?${PAGE_QUERY_PARAM}=${page}&${LIMIT_QUERY_PARAM}=${pageLength}`;
+      if (filterText !== "" && typeof filterText !== "undefined")
+        ENDPOINT_URL += `&agentName=${filterText}`;
+      TokenGenerator.get().then((accessToken) => {
+        fetch(ENDPOINT_URL, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
           .then((response) => {
-            if (!selectedAgentId) setAgents(response);
-            else {
-              let agent = response;
-              const index = agents.findIndex(
-                (agent) => agent.zoomId === selectedAgentId
-              );
-              const updatedAgents = update(agents, {
-                $splice: [[index, 1, agent]],
-              });
-              updatedAgents[index] = agent;
-              setAgents(updatedAgents);
-            }
+            let totalCount = response.headers.get("X-Total-Count");
+            setTotalPages(Math.ceil(totalCount / pageLength));
+            return response.json();
+          })
+          .then((data) => {
+            setAgents(data);
           })
           .catch((error) => console.log(error));
       });
     }, 500);
-
     return () => clearTimeout(delayDebounceFn);
-  }, [page, filterText, selectedAgentId]);
+  }, [filterText, page]);
 
   const handleFilterTextChange = (filterText) => {
     setFilterText(filterText);
