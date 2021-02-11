@@ -1,2 +1,3 @@
-@Library("talkdesk-default-pipeline")
-scriptedPipeline {}
+@Library("talkdesk-default-pipeline") _
+scriptedPipeline {
+}
