@@ -1,13 +1,3 @@
-Schedule:
-  nightly-deploy-stg:
-    cron: '0 4 * * *'
-    git tag: true
-    branch: staging
-  nightly-acceptance-qa:
-    cron: '0 4 * * *'
-    git tag: true
-    branch: master
-
 Build phase:
   stages:
     Unit Tests:
@@ -15,40 +5,30 @@ Build phase:
       steps:
         - k8s-ci/load-env.sh stg
         - k8s-ci/unit-tests.sh
-      when not:
-        - nightly-acceptance-qa
     Build STG:
       steps:
         - k8s-ci/load-env.sh stg
         - k8s-ci/build.sh stg
       when:
         - staging
-      when not:
-        - nightly-acceptance-qa
     Build QA:
       steps:
         - k8s-ci/load-env.sh qa
         - k8s-ci/build.sh qa
       when:
         - master
-      when not:
-        - nightly-acceptance-qa
     Build PRD:
       steps:
         - k8s-ci/load-env.sh prd
         - k8s-ci/build.sh prd
       when:
         - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
-      when not:
-        - nightly-acceptance-qa
     Raw Push:
       type: raw_push
       when:
         - staging
         - master
         - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
-      when not:
-        - nightly-acceptance-qa
 Deploy phase:
   stg:
     deploy mode: automatic
@@ -64,8 +44,6 @@ Deploy phase:
         type: deploy_s3
         when:
           - master
-        when not:
-          - nightly-acceptance-qa
   prd:
     deploy mode: automatic
     stages:
