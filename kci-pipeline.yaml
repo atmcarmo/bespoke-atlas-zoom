@@ -23,8 +23,6 @@ Build phase:
         - k8s-ci/build.sh stg
       when:
         - staging
-        - master
-        - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
       when not:
         - nightly-acceptance-qa
     Build QA:
@@ -32,9 +30,7 @@ Build phase:
         - k8s-ci/load-env.sh qa
         - k8s-ci/build.sh qa
       when:
-        - staging
         - master
-        - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
       when not:
         - nightly-acceptance-qa
     Build PRD:
@@ -42,8 +38,6 @@ Build phase:
         - k8s-ci/load-env.sh prd
         - k8s-ci/build.sh prd
       when:
-        - staging
-        - master
         - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
       when not:
         - nightly-acceptance-qa
