@@ -3,7 +3,7 @@
 set -u
 
 RELEASE_STAGE=${1^^}
-
+echo "RELEASE_STAGE:: ".$RELEASE_STAGE
 case $RELEASE_STAGE in
   STG)
     CDN_URL=https://stg-cdn-talkdesk.talkdeskdev.com
