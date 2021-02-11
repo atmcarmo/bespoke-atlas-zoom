@@ -1,46 +1,103 @@
 version: '3'
 services:
   common: &BASE
-    # environment:
-    #   - REACT_APP_DEMO_DASHBOARD_APP_ID=${REACT_APP_DEMO_DASHBOARD_APP_ID}
-    #   - REACT_APP_DEMO_WEBCARD_APP_ID=${REACT_APP_DEMO_WEBCARD_APP_ID}
     build:
       context: .
       args:
         - BUNDLE_GITHUB__COM=${BUNDLE_GITHUB__COM}
+    env_file:
+      - .env.docker
 
   build:
     <<: *BASE
-    command: ./scripts/build_packages.sh
+    command: yarn build
 
-  build-stg:
+  tests:
     <<: *BASE
+    command: yarn test:ci
+
+  voicemails:
+    <<: *BASE
+    ports:
+      - 3000:3000
+      - 8080:8080
+    networks:
+      app_net:
+        aliases:
+          - lvh.me
+          - www.lvh.me
+    working_dir: /usr/src/app
+    command: npm run serve
+
+  acceptance-base: &ACCEPTANCE_BASE
+    build:
+      context: .
+      args:
+        - BUNDLE_GITHUB__COM=${BUNDLE_GITHUB__COM}
+    networks:
+      - app_net
+    depends_on:
+      - chrome
+    env_file:
+      - .env.docker
+    working_dir: /usr/src/app
+
+  acceptance-deploy-qa:
+    <<: *ACCEPTANCE_BASE
     environment:
-      # - REACT_APP_DEMO_DASHBOARD_APP_ID=44a80d22300a4e12a77ddd17cdfb7fb6
-      # - REACT_APP_DEMO_WEBCARD_APP_ID=fd77e11decb2413a8256856d2c40c46fk
-      - REACT_APP_SDK_URL=https://stg-cdn-talkdesk.talkdeskdev.com/atlas/latest/sdk/index.js
-    command: ./scripts/build_packages.sh
+      - NODE_ENV=test
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - HUB_PATH=/wd/hub
+      - ACCEPTANCE_STAGE=QA
+    command: dockerize -wait https://tdagentappstestsqa.trytalkdesk.com/atlas -timeout 90s npm run acceptance -- --suite deploy
 
-  build-qa:
-    <<: *BASE
+  acceptance-deploy-prd:
+    <<: *ACCEPTANCE_BASE
     environment:
-      # - REACT_APP_DEMO_DASHBOARD_APP_ID=f36216c1464846ab976abe6567bda070
-      # - REACT_APP_DEMO_WEBCARD_APP_ID=3fad451815a74977826412cfedbce2cb
-      - REACT_APP_SDK_URL=https://qa-cdn-talkdesk.talkdeskdev.com/atlas/latest/sdk/index.js
-    command: ./scripts/build_packages.sh
+      - NODE_ENV=test
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - HUB_PATH=/wd/hub
+      - ACCEPTANCE_STAGE=PRD
+    command: dockerize -wait https://tdagentappstestsprd.mytalkdesk.com/atlas -timeout 90s npm run acceptance -- --suite deploy
 
-  build-prd:
-    <<: *BASE
+  acceptance: &ACCEPTANCE
+    <<: *ACCEPTANCE_BASE
+    depends_on:
+      - chrome
+      - voicemails
     environment:
-      # - REACT_APP_DEMO_DASHBOARD_APP_ID=44a80d22300a4e12a77ddd17cdfb7fb6
-      # - REACT_APP_DEMO_WEBCARD_APP_ID=fd77e11decb2413a8256856d2c40c46fk
-      - REACT_APP_SDK_URL=https://prd-cdn-talkdesk.talkdesk.com/atlas/latest/sdk/index.js
-    command: ./scripts/build_packages.sh
+      - NODE_ENV=test
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - HUB_PATH=/wd/hub
+    command: dockerize -wait https://www.lvh.me:8080 -timeout 90s npm run acceptance
 
-  test:
-    <<: *BASE
-    command: bash -c "yarn test:ci"
+  acceptance-smoke:
+    <<: *ACCEPTANCE
+    command: dockerize -wait https://www.lvh.me:8080 -timeout 90s npm run acceptance -- --suite smoke
 
-  lint:
-    <<: *BASE
-    command: bash -c "yarn lint"
+  acceptance-regression:
+    <<: *ACCEPTANCE
+    command: dockerize -wait https://www.lvh.me:8080 -timeout 90s npm run acceptance -- --suite regression
+
+  selenium-hub:
+    image: selenium/hub:latest
+    networks:
+      - app_net
+
+  chrome:
+    image: selenium/node-chrome:latest
+    volumes:
+      - /dev/shm:/dev/shm
+    networks:
+      - app_net
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+
+networks:
+  app_net:
