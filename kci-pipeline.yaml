@@ -1,104 +1,115 @@
-Notifications:
-  - channels:
-      - bespoke-devs
-    when:
-      - staging
-      - master
-    status:
-      - FAILURE
-      - BACK_TO_NORMAL
-      - SUCCESS
-      - ABORTED
-  - channels:
-      - bespoke-devs 
-    when:
-      - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
-    status:
-      - FAILURE
-      - BACK_TO_NORMAL
-      - SUCCESS
-      - ABORTED
-
-image: node:14.15.0-stretch-slim
+Schedule:
+  nightly-deploy-stg:
+    cron: '0 4 * * *'
+    git tag: true
+    branch: staging
+  nightly-acceptance-qa:
+    cron: '0 4 * * *'
+    git tag: true
+    branch: master
 
 Build phase:
   stages:
-    Setup:
-      type: generic
-      steps:
-        - yarn install
-
-    Static Analysis Tests:
-      type: static_tests
-      steps:
-        - yarn run lint:dry
-
     Unit Tests:
       type: tests
       steps:
-        - yarn run test:coverage
-      report html: coverage/index.html
-
-    Build [STG]:
-      type: raw_build
+        - k8s-ci/load-env.sh stg
+        - k8s-ci/unit-tests.sh
+      when not:
+        - nightly-acceptance-qa
+    Acceptance Tests:
+      type: tests
+      steps:
+        - k8s-ci/load-env.sh qa
+        - k8s-ci/integration-tests.sh
+      when:
+        - ^(PR|pr)-([0-9]+)$
+        - staging
+        - master
+      when not:
+        - nightly-acceptance-qa
+      reports:
+        - acceptance/*.xml
+    Build STG:
+      steps:
+        - k8s-ci/load-env.sh stg
+        - k8s-ci/build.sh stg
       when:
         - staging
-      environments:
-        - stg
-      steps:
-        - yarn build:staging
-        - mkdir -p $OUTPUT_PATH_ARTIFACTS
-        - cp -a ./build/. ${OUTPUT_PATH_ARTIFACTS}
-
-    Build [QA]:
-      type: raw_build
-      when:
         - master
-      environments:
-        - qa
-      steps:
-        - yarn build:qa
-        - mkdir -p $OUTPUT_PATH_ARTIFACTS
-        - cp -a ./build/. ${OUTPUT_PATH_ARTIFACTS}
-
-    Build [PRD]:
-      type: raw_build
-      when:
         - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
-      environments:
-        - prd
+      when not:
+        - nightly-acceptance-qa
+    Build QA:
       steps:
-        - yarn build:production
-        - mkdir -p $OUTPUT_PATH_ARTIFACTS
-        - cp -a ./build/. ${OUTPUT_PATH_ARTIFACTS}
-
-    # Publishing will occur in every environment
-    Publish:
+        - k8s-ci/load-env.sh qa
+        - k8s-ci/build.sh qa
+      when:
+        - staging
+        - master
+        - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
+      when not:
+        - nightly-acceptance-qa
+    Build PRD:
+      steps:
+        - k8s-ci/load-env.sh prd
+        - k8s-ci/build.sh prd
+      when:
+        - staging
+        - master
+        - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
+      when not:
+        - nightly-acceptance-qa
+    Raw Push:
       type: raw_push
       when:
         - staging
         - master
         - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
-
+      when not:
+        - nightly-acceptance-qa
 Deploy phase:
   stg:
     deploy mode: automatic
     stages:
-      Upload assets to S3 [STG]:
+      Upload STG:
         type: deploy_s3
         when:
           - staging
   qa:
     deploy mode: automatic
     stages:
-      Upload assets to S3 [QA]:
+      Upload QA:
         type: deploy_s3
         when:
           - master
+        when not:
+          - nightly-acceptance-qa
+      Acceptance tests:
+        type: tests
+        steps:
+          - k8s-ci/wait-for-deploy.sh qa
+          - k8s-ci/load-env.sh qa
+          - k8s-ci/acceptance-tests.sh qa
+        reports:
+          - acceptance/*.xml
+        when:
+          - master
+          - nightly-acceptance-qa
   prd:
     deploy mode: automatic
     stages:
-      Upload assets to S3 [PRD]:
+      Upload PRD:
         type: deploy_s3
+        when:
+          - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
+      Acceptance tests:
+        type: tests
+        steps:
+          - k8s-ci/wait-for-deploy.sh prd
+          - k8s-ci/load-env.sh prd
+          - k8s-ci/acceptance-tests.sh prd
+        reports:
+          - acceptance/*.xml
         when:
           - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$

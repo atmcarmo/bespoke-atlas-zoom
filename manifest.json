@@ -1,0 +1,32 @@
+{
+  "name": "Zoom Directory App",
+  "version": "0.0.0",
+  "sdk-version": "1",
+  "capabilities": [
+    "authorization",
+    {
+      "name": "i18n",
+      "languages": ["en-US", "pt-PT"],
+      "resourcesTemplateUrl": "https://www.lvh.me:3000/assets/locales/{{lng}}/{{ns}}.json"
+    }
+  ],
+  "scopes": [
+    "apps:graphql",
+    "openid",
+    "policies:evaluate",
+    "rtm-settings:read",
+    "rtm-user:auth",
+    "user-notifications:read",
+    "user-notifications:write",
+    "account-profile:read",
+    "workspace-settings:read",
+    "workspace-settings:write",
+    "account:read",
+    "bespoke-zoom-presence:read"
+  ],
+  "assets": {
+    "icon": "https://stg-cdn-talkdesk.talkdeskdev.com/cdn-assets/latest/talkdesk/product/app-icons/zoom-directory.svg"
+  },
+  "src": "https://www.lvh.me:3000",
+  "slug": "bespoke-atlas-zoom"
+}

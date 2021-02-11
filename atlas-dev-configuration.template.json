@@ -1,0 +1,11 @@
+{
+  "authentication": {
+    "id": "Client Id",
+    "secret": "Client Secret",
+    "privateKey": "Private Key",
+    "clientKeyId": "Key Id",
+    "clientKeyAlgorithm": "Algorithm",
+    "talkdeskIdBaseUrl": "talkdeskstgid.com",
+    "account": "Your account informed in the creation of token"
+  }
+}
