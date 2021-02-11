@@ -66,31 +66,10 @@ Deploy phase:
           - master
         when not:
           - nightly-acceptance-qa
-      Acceptance tests:
-        type: tests
-        steps:
-          - k8s-ci/wait-for-deploy.sh qa
-          - k8s-ci/load-env.sh qa
-          - k8s-ci/acceptance-tests.sh qa
-        reports:
-          - acceptance/*.xml
-        when:
-          - master
-          - nightly-acceptance-qa
   prd:
     deploy mode: automatic
     stages:
       Upload PRD:
         type: deploy_s3
-        when:
-          - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
-      Acceptance tests:
-        type: tests
-        steps:
-          - k8s-ci/wait-for-deploy.sh prd
-          - k8s-ci/load-env.sh prd
-          - k8s-ci/acceptance-tests.sh prd
-        reports:
-          - acceptance/*.xml
         when:
           - ^v[0-9]+\.[0-9]+\.[0-9]+(-RC\.[0-9]+)?$
